@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MCN: Mastitis – Adele Pillitteri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #b45309; border-radius: 8px; }
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1;
+            color: transparent;
+            border-radius: 0.375rem;
+            padding: 0 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: inset 0 0 0 1px #94a3b8;
+        }
+        .recall-mode .reveal-text:hover,
+        .recall-mode .reveal-text.revealed {
+            background-color: #fde047;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        .content-section { animation: fade 0.3s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .locked-section { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+        .quiz-feedback-correct { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+        .quiz-feedback-wrong { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+        .nav-btn.active { background-color: #ffedd5; color: #9a3412; border-right: 4px solid #ea580c; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { mastitis: { light: '#ffedd5', DEFAULT: '#ea580c', dark: '#9a3412' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-mastitis-dark text-white p-4 flex justify-between items-center shadow-md z-30 shrink-0">
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none z-40"><i class="fa-solid fa-bars text-2xl"></i></button>
+        <h1 class="font-bold text-lg absolute left-1/2 transform -translate-x-1/2 pointer-events-none"><i class="fa-solid fa-ribbon mr-2"></i> Mastitis</h1>
+        <div class="w-8"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-80 bg-white shadow-2xl h-full absolute md:relative z-30 transition-all duration-300 shrink-0 border-r border-slate-200 overflow-y-auto">
+        <div class="p-6 bg-gradient-to-br from-mastitis-dark to-mastitis text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-solid fa-ribbon text-mastitis-light mr-2"></i> Mastitis</h1>
+            <p class="text-sm text-slate-300 mt-1">Adele Pillitteri · Maternal‑Child Nursing</p>
+        </div>
+        <div class="flex-1 py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden text-slate-400"></i> Home / Start</button></li>
+                <li><button onclick="showSection('overview')" id="btn-overview" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-book-open w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 1. Definition & Etiology</button></li>
+                <li><button onclick="showSection('risk')" id="btn-risk" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-chart-line w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 2. Risk Factors & Pathophysiology</button></li>
+                <li><button onclick="showSection('clinical')" id="btn-clinical" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-stethoscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 3. Clinical Manifestations & Diagnosis</button></li>
+                <li><button onclick="showSection('management')" id="btn-management" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-hand-holding-medical w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 4. Treatment & Management</button></li>
+                <li><button onclick="showSection('nursing')" id="btn-nursing" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-user-nurse w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 5. Nursing Role & Patient Education</button></li>
+                <li><button onclick="showSection('mnemonics')" id="btn-mnemonics" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-brain w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 6. Mnemonic Appendix</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-graduation-cap w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final 50‑Item Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        <div class="fixed top-16 md:top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-mastitis mr-1"></i> Active Recall</span>
+            <span class="mr-3 text-sm font-bold text-slate-700 md:hidden"><i class="fa-solid fa-brain text-mastitis"></i></span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto pb-32">
+            <!-- HOME -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-mastitis-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5"><i class="fa-solid fa-ribbon text-[20rem]"></i></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-mastitis-light mb-6"><i class="fa-solid fa-hand-holding-heart text-5xl"></i></div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2 uppercase">Maternal‑Child Nursing · Adele Pillitteri</h3>
+                        <h1 class="text-4xl md:text-6xl font-black leading-tight drop-shadow-md">Mastitis</h1>
+                        <p class="text-lg max-w-2xl mx-auto mt-6 text-slate-200">Acute inflammation and infection of the breast during lactation. Master etiology, risk factors, clinical signs, antibiotic therapy, breastfeeding management, and prevention.</p>
+                        <button onclick="unlockFirstSection()" class="mt-10 bg-slate-600 hover:bg-slate-500 text-white font-black py-4 px-12 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto">Begin Module <i class="fa-solid fa-arrow-right ml-3"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1: Definition & Etiology -->
+            <section id="overview" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-book-open text-mastitis mr-4"></i> Definition & Etiology</h2>
+                    <div class="bg-mastitis-light/20 border-l-4 border-mastitis p-4 rounded-r mb-6">Mastitis is an inflammation of the breast tissue, often caused by infection, that commonly occurs during lactation. It typically affects <span class="reveal-text">one breast</span> and peaks between <span class="reveal-text">2–4 weeks postpartum</span>, though it can occur at any time during breastfeeding.</div>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Etiologic agent:</strong> <span class="reveal-text">Staphylococcus aureus</span> (most common), also Streptococcus, E. coli.</li>
+                        <li><strong>Entry portal:</strong> Cracked or fissured nipples → bacteria from infant's nose/pharynx or mother's skin enters breast tissue.</li>
+                        <li><strong>Predisposing factor:</strong> Milk stasis (incomplete emptying, missed feedings, poor latch) → allows bacterial proliferation.</li>
+                    </ul>
+                    <button onclick="openQuiz('overview')" class="mt-8 w-full bg-mastitis text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 2: Risk Factors & Pathophysiology -->
+            <section id="risk" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-chart-line text-mastitis mr-4"></i> Risk Factors & Pathophysiology</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong class="text-mastitis">👩 Risk Factors</strong><br>• Cracked or sore nipples<br>• Poor latch or positioning<br>• Missed feedings or abrupt weaning<br>• Overly tight bra or clothing<br>• Maternal stress, fatigue<br>• Previous mastitis history<br>• Use of nipple creams without proper hygiene</div>
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong class="text-mastitis">🔬 Pathophysiology</strong><br>Milk stasis → bacterial overgrowth → inflammatory response → edema, pain, erythema. If untreated, may progress to abscess formation. Inflammation can lead to systemic symptoms (fever, chills, malaise).</div>
+                    </div>
+                    <button onclick="openQuiz('risk')" class="mt-8 w-full bg-mastitis text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 3: Clinical Manifestations & Diagnosis -->
+            <section id="clinical" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-stethoscope text-mastitis mr-4"></i> Clinical Manifestations & Diagnosis</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Local signs:</strong> <span class="reveal-text">Breast pain, tenderness, erythema (wedge‑shaped area), warmth, swelling</span>.</li>
+                        <li><strong>Systemic signs:</strong> Fever (>38.5°C), chills, malaise, myalgia, flu‑like symptoms.</li>
+                        <li><strong>Timing:</strong> Usually unilateral (rarely bilateral).</li>
+                        <li><strong>Diagnosis:</strong> Clinical – based on history and physical exam. If recurrent or severe, milk culture and antibiotic sensitivity testing. Ultrasound to rule out abscess.</li>
+                        <li><strong>Differential diagnosis:</strong> Breast engorgement (bilateral, no fever/infection), plugged duct (localized tender lump, afebrile), inflammatory breast cancer (rare).</li>
+                    </ul>
+                    <div class="bg-amber-50 p-2 rounded-lg mt-2 text-sm">⚠️ <strong>Key distinction:</strong> Engorgement: bilateral, full breasts, afebrile. Mastitis: unilateral, erythema, fever, systemic symptoms.</div>
+                    <button onclick="openQuiz('clinical')" class="mt-8 w-full bg-mastitis text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 4: Treatment & Management -->
+            <section id="management" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-hand-holding-medical text-mastitis mr-4"></i> Treatment & Management</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Antibiotics:</strong> <span class="reveal-text">Dicloxacillin or cephalexin (first‑line)</span> – cover S. aureus. For penicillin‑allergic: clindamycin or erythromycin. Duration: 10–14 days; symptoms improve in 24–48 hours but complete course essential.</li>
+                        <li><strong>Breastfeeding / Milk expression:</strong> <span class="reveal-text">Continue breastfeeding or pumping on the affected side</span> – emptying the breast is crucial. Start feeding on the unaffected side to let down reflex, then switch to affected side. If too painful, pump.</li>
+                        <li><strong>Supportive measures:</strong> <span class="reveal-text">Analgesics (acetaminophen or ibuprofen)</span>, adequate hydration, rest, supportive bra. Warm compresses before feeding to promote milk flow; cold compresses after feeding for comfort.</li>
+                        <li><strong>Abscess management:</strong> If abscess forms (fluctuant mass), <span class="reveal-text">needle aspiration or surgical incision and drainage</span>. Continue antibiotics. Temporary pumping from affected breast may be advised.</li>
+                    </ul>
+                    <div class="bg-green-50 p-2 rounded-lg mt-2 text-sm">✅ <strong>Key teaching:</strong> Breastfeeding is safe for the infant – bacteria are not harmful; antibiotics are safe for breastfeeding.</div>
+                    <button onclick="openQuiz('management')" class="mt-8 w-full bg-mastitis text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 5: Nursing Role & Patient Education -->
+            <section id="nursing" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-user-nurse text-mastitis mr-4"></i> Nursing Role & Patient Education</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Prevention:</strong> Teach proper breastfeeding technique (good latch, positioning), avoid skipped feedings, treat cracked nipples early, hand‑express to soften breast before feeding.</li>
+                        <li><strong>Early recognition:</strong> Educate on signs (pain, redness, fever) – prompt treatment prevents abscess.</li>
+                        <li><strong>Medication teaching:</strong> Take antibiotics as prescribed, complete full course, do not discontinue early. Use analgesics as needed.</li>
+                        <li><strong>Breast care:</strong> Apply warm compresses before feeding, cold packs after. Use supportive bra, avoid tight clothing.</li>
+                        <li><strong>Rest and hydration:</strong> Encourage rest, increase fluid intake.</li>
+                        <li><strong>Follow‑up:</strong> If no improvement in 48–72 hours, notify provider (possible abscess or resistant organism).</li>
+                    </ul>
+                    <button onclick="openQuiz('nursing')" class="mt-8 w-full bg-mastitis text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 6: Mnemonics -->
+            <section id="mnemonics" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-mastitis pb-3"><i class="fa-solid fa-brain text-mastitis mr-4"></i> Mnemonic Appendix</h2>
+                    <div class="overflow-x-auto rounded-xl border">
+                        <table class="w-full text-left text-sm md:text-base"><thead class="bg-mastitis-dark text-white"><tr><th class="p-3">Topic</th><th class="p-3">Mnemonic</th><th class="p-3">Meaning</th></tr></thead>
+                        <tbody><tr><td class="p-3 font-semibold">Most common organism</span></td><td class="font-black">S. aureus</span></td><td class="reveal-text">Staphylococcus aureus</span></td>
+                        <tr class="bg-slate-50"><td class="p-3 font-semibold">Risk factors</span></td><td class="font-black">C P M S</span></td><td class="reveal-text">Cracked nipples, Poor latch, Missed feedings, Stress/fatigue</span></td>
+                        <tr><td class="p-3 font-semibold">First‑line antibiotics</span></td><td class="font-black">D C</span></td><td class="reveal-text">Dicloxacillin, Cephalexin</span></td>
+                        <tr class="bg-slate-50"><td class="p-3 font-semibold">Key management action</span></td><td class="font-black">B E</span></td><td class="reveal-text">Breastfeed (empty breast), Express milk</span></td>
+                        <tr><td class="p-3 font-semibold">Complication if untreated</span></td><td class="font-black">Abscess</span></td><td class="reveal-text">Breast abscess requiring drainage</span></td>
+                        </tbody>
+                    </table>
+                    <button onclick="openQuiz('final_quiz')" class="mt-8 w-full bg-amber-500 text-slate-900 font-black py-4 rounded-xl shadow-md hover:bg-amber-400 text-lg"><i class="fa-solid fa-graduation-cap mr-3"></i> Take Final 50‑Item Exam</button>
+                </div>
+            </section>
+
+            <!-- Final Quiz Section -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-graduation-cap text-8xl text-amber-400 mb-6"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final 50‑Item Exam</h2>
+                    <p class="text-lg text-slate-600 mb-8">Covers all 5 sections. 75% required to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-mastitis-dark text-white font-black py-4 rounded-xl shadow-md hover:bg-mastitis text-xl">Start Final Exam</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+            <p class="text-slate-600 mb-6 font-medium border-b pb-4">Score ≥75% to unlock next section.</p>
+            <div id="quiz-questions-container" class="space-y-4"></div>
+            <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-mastitis text-white font-bold py-4 rounded-xl shadow-lg text-lg">Submit Answers</button>
+            <div id="quiz-result-container" class="hidden mt-6 p-4 rounded-xl bg-slate-100 border"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let unlockedSections = ['home'];
+            // Quiz data – 10 questions each for 5 sections (overview, risk, clinical, management, nursing)
+            const quizzes = {
+                overview: {
+                    title: "Quiz 1: Definition & Etiology (10 items)",
+                    next: "risk",
+                    questions: [
+                        { q: "Mastitis is most commonly caused by:", options: ["Streptococcus agalactiae", "Staphylococcus aureus", "Escherichia coli", "Candida albicans"], ans: 1 },
+                        { q: "The primary route of infection in lactation mastitis is:", options: ["Hematogenous spread", "Ascending from nipple cracks", "Lymphatic spread", "Contaminated breast pump"], ans: 1 },
+                        { q: "Mastitis typically occurs at what postpartum time?", options: ["First week", "2–4 weeks", "3 months", "6 months"], ans: 1 },
+                        { q: "Which of the following predisposes to mastitis?", options: ["Oversupply of milk", "Milk stasis", "Frequent feeding", "Pacifier use"], ans: 1 },
+                        { q: "The most common bacterial agent in mastitis is:", options: ["Group B streptococcus", "Methicillin‑sensitive S. aureus", "Methicillin‑resistant S. aureus (less common)", "Both B and C"], ans: 3 },
+                        { q: "Mastitis is typically:", options: ["Bilateral", "Unilateral", "Always bilateral after first episode", "Unrelated to lactation"], ans: 1 },
+                        { q: "Cracked nipples predispose to mastitis because they:", options: ["Increase milk production", "Provide portal for bacterial entry", "Cause milk stasis", "Decrease immunity"], ans: 1 },
+                        { q: "The most important predisposing factor for mastitis is:", options: ["Incomplete breast emptying (milk stasis)", "Maternal diet", "Baby's thrush", "Maternal age"], ans: 0 },
+                        { q: "Mastitis is most common in:", options: ["Primiparas", "Multiparas", "Women over 40", "Formula‑feeding mothers"], ans: 0 },
+                        { q: "Which of the following is NOT a risk factor for mastitis?", options: ["Poor latch", "Skipped feedings", "Well‑fitting supportive bra", "Nipple trauma"], ans: 2 }
+                    ]
+                },
+                risk: {
+                    title: "Quiz 2: Risk Factors & Pathophysiology (10 items)",
+                    next: "clinical",
+                    questions: [
+                        { q: "A breastfeeding mother with a history of mastitis is at risk for:", options: ["Recurrent mastitis", "Galactorrhea", "Breast cancer", "Inverted nipple"], ans: 0 },
+                        { q: "Which of the following can cause milk stasis?", options: ["Overly tight bra", "Infrequent feeding", "Poor latch", "All of the above"], ans: 3 },
+                        { q: "Maternal fatigue and stress increase mastitis risk by:", options: ["Decreasing immune function", "Increasing milk supply", "Causing nipple cracks", "Directly infecting milk"], ans: 0 },
+                        { q: "Pathophysiology of mastitis involves:", options: ["Bacterial overgrowth in stagnant milk → inflammation", "Autoimmune reaction", "Hormonal imbalance", "Milk allergy"], ans: 0 },
+                        { q: "Which infant factor may contribute to maternal mastitis?", options: ["Poor latch", "Cleft palate", "Short frenulum", "All of the above"], ans: 3 },
+                        { q: "Abrupt weaning increases mastitis risk because:", options: ["Milk production stops suddenly", "Milk accumulates, causing stasis", "Antibodies decrease", "Nipples become sore"], ans: 1 },
+                        { q: "Which of the following is a modifiable risk factor for mastitis?", options: ["Maternal age", "Parity", "Breastfeeding frequency", "Genetics"], ans: 2 },
+                        { q: "Use of nipple creams without proper hygiene may:", options: ["Prevent mastitis", "Traps bacteria and increase infection risk", "Increase milk supply", "Cause thrush"], ans: 1 },
+                        { q: "A mother who feeds only one breast per session is at higher risk for:", options: ["Oversupply", "Mastitis in the less frequently used breast", "Thrush", "Galactorrhea"], ans: 1 },
+                        { q: "In mastitis, the inflammatory response leads to:", options: ["Redness, warmth, edema, and pain", "Hypopigmentation", "Nipple inversion", "Milk curdling"], ans: 0 }
+                    ]
+                },
+                clinical: {
+                    title: "Quiz 3: Clinical Manifestations & Diagnosis (10 items)",
+                    next: "management",
+                    questions: [
+                        { q: "A lactating mother presents with a red, painful, wedge‑shaped area on her left breast and fever of 39°C. The most likely diagnosis is:", options: ["Breast engorgement", "Plugged duct", "Mastitis", "Inflammatory breast cancer"], ans: 2 },
+                        { q: "Systemic symptoms of mastitis include:", options: ["Fever, chills, malaise", "Bradycardia", "Hypotension", "Rash"], ans: 0 },
+                        { q: "Which finding distinguishes mastitis from breast engorgement?", options: ["Fever and systemic illness", "Bilateral breast involvement", "Painless swelling", "Increased milk production"], ans: 0 },
+                        { q: "A patient with mastitis who does not improve after 48–72 hours of antibiotics should be evaluated for:", options: ["Breast abscess", "Allergic reaction", "Viral mastitis", "Pregnancy"], ans: 0 },
+                        { q: "The most common complication of untreated mastitis is:", options: ["Chronic pain", "Breast abscess", "Nipple necrosis", "Galactorrhea"], ans: 1 },
+                        { q: "Diagnosis of mastitis is primarily based on:", options: ["Milk culture", "Ultrasound", "Clinical history and physical exam", "Mammography"], ans: 2 },
+                        { q: "A palpable fluctuant mass in a patient with mastitis suggests:", options: ["Abscess formation", "Plugged duct", "Cyst", "Fibroadenoma"], ans: 0 },
+                        { q: "Which of the following is NOT a typical sign of mastitis?", options: ["Unilateral breast erythema", "Wedge‑shaped induration", "Bilateral symmetrical redness", "Fever"], ans: 2 },
+                        { q: "Mastitis usually affects which area of the breast?", options: ["Lower inner quadrant", "Upper outer quadrant (most common due to milk stasis)", "Areola only", "Retroareolar region"], ans: 1 },
+                        { q: "A mother with mastitis reports that her symptoms began after a missed feeding. This supports:", options: ["Milk stasis as the trigger", "Viral infection", "Allergic reaction", "Trauma"], ans: 0 }
+                    ]
+                },
+                management: {
+                    title: "Quiz 4: Treatment & Management (10 items)",
+                    next: "nursing",
+                    questions: [
+                        { q: "First‑line antibiotic for lactation mastitis is:", options: ["Penicillin", "Dicloxacillin or cephalexin", "Erythromycin", "Clindamycin"], ans: 1 },
+                        { q: "A mother with mastitis should be advised to:", options: ["Stop breastfeeding on the affected side", "Continue breastfeeding or pumping to empty the breast", "Apply ice before feeding", "Restrict fluids"], ans: 1 },
+                        { q: "The duration of antibiotic therapy for mastitis is typically:", options: ["3–5 days", "7–10 days", "10–14 days", "21 days"], ans: 2 },
+                        { q: "Which of the following is safe for pain relief in mastitis while breastfeeding?", options: ["Ibuprofen or acetaminophen", "Aspirin", "Naproxen", "Codeine"], ans: 0 },
+                        { q: "If a breast abscess develops, treatment includes:", options: ["Antibiotics alone", "Incision and drainage or needle aspiration", "Hormonal therapy", "Mastectomy"], ans: 1 },
+                        { q: "A mother with mastitis asks if she can continue breastfeeding. The nurse should:", options: ["Advise stopping temporarily", "Encourage continued breastfeeding; it is safe and helps resolution", "Recommend formula only", "Pump and discard milk"], ans: 1 },
+                        { q: "Warm compresses before feeding are used to:", options: ["Reduce inflammation", "Promote milk flow and relieve pain", "Decrease milk production", "Prevent infection"], ans: 1 },
+                        { q: "Cold compresses after feeding are used to:", options: ["Enhance let‑down", "Relieve pain and reduce edema", "Increase milk supply", "Kill bacteria"], ans: 1 },
+                        { q: "The mother should be advised that symptoms of mastitis usually improve within:", options: ["12 hours", "24–48 hours of starting antibiotics", "1 week", "1 month"], ans: 1 },
+                        { q: "If the mother cannot tolerate breastfeeding due to pain, she should:", options: ["Stop all attempts", "Pump or hand‑express milk from the affected breast", "Feed only from unaffected side", "Take codeine"], ans: 1 }
+                    ]
+                },
+                nursing: {
+                    title: "Quiz 5: Nursing Role & Patient Education (10 items)",
+                    next: "mnemonics",
+                    questions: [
+                        { q: "The nurse should teach a breastfeeding mother to prevent mastitis by:", options: ["Feed on demand, ensure good latch, avoid skipped feedings", "Limit feeding time to 5 minutes per side", "Apply alcohol to nipples after feeding", "Wear underwire bras"], ans: 0 },
+                        { q: "A mother with mastitis reports that her baby is not latching well. The nurse should:", options: ["Refer to lactation consultant", "Advise formula feeding", "Suggest nipple shields without evaluation", "Ignore complaint"], ans: 0 },
+                        { q: "Which statement by a mother indicates understanding of mastitis prevention?", options: ["I will feed my baby whenever he is hungry, even if breasts feel full", "I will skip nighttime feedings to sleep more", "I will stop breastfeeding if my nipples are sore", "I will feed only from one breast per session"], ans: 0 },
+                        { q: "The nurse should instruct the mother with mastitis to:", options: ["Wear a supportive, non‑constrictive bra", "Apply heat after feeding only", "Decrease fluid intake", "Avoid all physical activity"], ans: 0 },
+                        { q: "Which complementary measure helps reduce pain and inflammation in mastitis?", options: ["Cabbage leaves (cold compress)", "Hot packs continuously", "Ice massage before feeding", "Alcohol rubs"], ans: 0 },
+                        { q: "The nurse should advise the mother to contact her provider if:", options: ["Symptoms worsen after 48–72 hours of antibiotics", "She has mild breast pain", "Baby spits up", "She feels tired"], ans: 0 },
+                        { q: "To prevent recurrence, the nurse should teach:", options: ["Continue antibiotics for full course, improve feeding technique, manage stress", "Stop breastfeeding permanently", "Take prophylactic antibiotics", "Use nipple shields indefinitely"], ans: 0 },
+                        { q: "Which of the following is an appropriate nursing diagnosis for a patient with mastitis?", options: ["Acute pain related to breast inflammation", "Ineffective breastfeeding related to poor latch", "Risk for infection transmission", "All of the above"], ans: 3 },
+                        { q: "The nurse should document which of the following for a patient with mastitis?", options: ["Breast redness, warmth, tenderness, fever, antibiotic prescribed", "Infant birth weight", "Father's occupation", "Family history of diabetes"], ans: 0 },
+                        { q: "A mother with mastitis asks if she can take ibuprofen. The nurse responds:", options: ["Ibuprofen is safe and effective for pain/inflammation while breastfeeding", "No, you must use acetaminophen only", "No pain relievers are safe", "Only aspirin is allowed"], ans: 0 }
+                    ]
+                }
+            };
+            
+            // Build final 50‑item exam (10 from each of 5 sections)
+            let finalQuestions = [];
+            for(let sec of ['overview','risk','clinical','management','nursing']) {
+                finalQuestions = finalQuestions.concat(quizzes[sec].questions.slice(0,10));
+            }
+            while(finalQuestions.length < 50) finalQuestions.push({ q: "What is the most common causative organism of lactation mastitis?", options: ["Streptococcus pyogenes", "Staphylococcus aureus", "Escherichia coli", "Candida albicans"], ans: 1 });
+            quizzes['final_quiz'] = { title: "Final 50‑Item Exam: Mastitis", next: null, questions: finalQuestions.slice(0,50) };
+            
+            // Global functions
+            window.unlockedSections = unlockedSections;
+            window.quizzes = quizzes;
+            
+            window.unlockFirstSection = function() {
+                if(!unlockedSections.includes('overview')) {
+                    unlockedSections.push('overview');
+                    updateSidebarUI();
+                }
+                showSection('overview');
+            };
+            
+            window.showSection = function(id) {
+                if(!unlockedSections.includes(id) && id !== 'home') {
+                    alert("Complete the previous section quiz (≥75%) to unlock this content.");
+                    return;
+                }
+                document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+                const target = document.getElementById(id);
+                if(target) target.classList.remove('hidden');
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.getElementById('btn-'+id);
+                if(activeBtn) activeBtn.classList.add('active');
+                if(window.innerWidth < 768) document.getElementById('sidebar')?.classList.add('hidden');
+                document.querySelector('main').scrollTop = 0;
+            };
+            
+            function updateSidebarUI() {
+                const all = ['home','overview','risk','clinical','management','nursing','mnemonics','final_quiz_sec'];
+                all.forEach(sec => {
+                    const btn = document.getElementById('btn-'+sec);
+                    if(!btn) return;
+                    const lockIcon = btn.querySelector('.fa-lock'), mainIcon = btn.querySelector('.nav-icon');
+                    if(unlockedSections.includes(sec) || sec === 'home') {
+                        btn.classList.remove('locked-section');
+                        if(lockIcon) lockIcon.classList.add('hidden');
+                        if(mainIcon) mainIcon.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('locked-section');
+                        if(lockIcon) lockIcon.classList.remove('hidden');
+                        if(mainIcon) mainIcon.classList.add('hidden');
+                    }
+                });
+            }
+            
+            let currentQuiz = null;
+            window.openQuiz = function(sectionId) {
+                currentQuiz = sectionId;
+                const qd = quizzes[sectionId];
+                if(!qd) return;
+                document.getElementById('quiz-title').innerText = qd.title;
+                const container = document.getElementById('quiz-questions-container');
+                container.innerHTML = '';
+                qd.questions.forEach((q, idx) => {
+                    let html = `<div class="bg-slate-50 p-4 rounded-xl border mb-4"><p class="font-bold mb-3">${idx+1}. ${q.q}</p><div class="space-y-2">`;
+                    q.options.forEach((opt, oi) => {
+                        html += `<label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white cursor-pointer"><input type="radio" name="q${idx}" value="${oi}" class="form-radio text-mastitis"><span>${opt}</span></label>`;
+                    });
+                    html += `</div><div class="feedback-${idx} text-sm mt-2 hidden"></div></div>`;
+                    container.innerHTML += html;
+                });
+                document.getElementById('quiz-submit-btn').classList.remove('hidden');
+                document.getElementById('quiz-result-container').classList.add('hidden');
+                document.getElementById('quiz-modal').classList.remove('hidden');
+            };
+            
+            window.closeQuiz = function() { document.getElementById('quiz-modal').classList.add('hidden'); };
+            
+            window.submitQuiz = function() {
+                const qd = quizzes[currentQuiz];
+                if(!qd) return;
+                let score = 0;
+                for(let i = 0; i < qd.questions.length; i++) {
+                    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                    const isCorrect = selected && parseInt(selected.value) === qd.questions[i].ans;
+                    if(isCorrect) score++;
+                    const fbDiv = document.querySelector(`.feedback-${i}`);
+                    if(fbDiv) {
+                        fbDiv.classList.remove('hidden');
+                        const correctAns = qd.questions[i].options[qd.questions[i].ans];
+                        if(isCorrect) {
+                            fbDiv.innerHTML = `<span class="text-green-700"><i class="fa-regular fa-circle-check"></i> Correct!</span>`;
+                            fbDiv.parentElement?.classList.add('quiz-feedback-correct');
+                            fbDiv.parentElement?.classList.remove('quiz-feedback-wrong');
+                        } else {
+                            const selectedText = selected ? qd.questions[i].options[parseInt(selected.value)] : "No answer";
+                            fbDiv.innerHTML = `<span class="text-red-700"><i class="fa-regular fa-circle-xmark"></i> Incorrect. Correct: ${correctAns}. Your answer: ${selectedText}</span>`;
+                            fbDiv.parentElement?.classList.add('quiz-feedback-wrong');
+                            fbDiv.parentElement?.classList.remove('quiz-feedback-correct');
+                        }
+                    }
+                }
+                const percent = (score / qd.questions.length) * 100;
+                const resultDiv = document.getElementById('quiz-result-container');
+                const btn = document.getElementById('quiz-submit-btn');
+                btn.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+                if(percent >= 75) {
+                    if(currentQuiz === 'final_quiz') {
+                        resultDiv.innerHTML = `<div class="text-amber-500 text-6xl text-center">🏆</div><h3 class="text-2xl font-black text-center">Mastery Achieved!</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%)</p><p class="text-center text-green-700">You have mastered Mastitis based on Adele Pillitteri.</p><button onclick="closeQuiz()" class="mt-4 w-full bg-mastitis text-white py-2 rounded-lg">Close</button>`;
+                        return;
+                    }
+                    if(qd.next && !unlockedSections.includes(qd.next)) {
+                        unlockedSections.push(qd.next);
+                        if(qd.next === 'mnemonics') unlockedSections.push('final_quiz_sec');
+                        updateSidebarUI();
+                    }
+                    resultDiv.innerHTML = `<div class="text-green-600 text-5xl text-center">✓</div><h3 class="text-2xl font-black text-center">Passed!</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%)</p><button onclick="closeQuiz(); showSection('${qd.next}')" class="mt-4 w-full bg-green-600 text-white py-2 rounded-lg">Unlock Next Section</button>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="text-red-500 text-5xl text-center">✗</div><h3 class="text-2xl font-black text-center">Failed</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%). Need 75%.</p><button onclick="openQuiz('${currentQuiz}')" class="mt-4 w-full bg-slate-600 text-white py-2 rounded-lg">Try Again</button>`;
+                }
+            };
+            
+            window.toggleRecallMode = function() {
+                const active = !document.body.classList.contains('recall-mode');
+                const toggle = document.getElementById('recall-toggle'), knob = document.getElementById('recall-knob');
+                if(active) {
+                    document.body.classList.add('recall-mode');
+                    toggle.classList.add('bg-mastitis');
+                    knob.classList.add('translate-x-6');
+                } else {
+                    document.body.classList.remove('recall-mode');
+                    toggle.classList.remove('bg-mastitis');
+                    knob.classList.remove('translate-x-6');
+                }
+            };
+            
+            window.toggleMobileMenu = function() {
+                const s = document.getElementById('sidebar');
+                if(s.classList.contains('hidden')) s.classList.remove('hidden');
+                else s.classList.add('hidden');
+            };
+            
+            document.addEventListener('DOMContentLoaded', () => {
+                updateSidebarUI();
+                document.querySelectorAll('.reveal-text').forEach(el => {
+                    el.addEventListener('click', function() {
+                        if(document.body.classList.contains('recall-mode')) this.classList.toggle('revealed');
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
